@@ -80,6 +80,18 @@ services:
     networks:
       - backend
 
+  swagger_ui:
+    image: swaggerapi/swagger-ui
+    container_name: swagger_ui
+    ports:
+      - "8081:8080"
+    environment:
+      - SWAGGER_JSON=/config/swagger-config.json
+    volumes:
+      - ./backend/swagger-config.json:/config/swagger-config.json
+    networks:
+      - backend
+
 volumes:
   db_data:
 
