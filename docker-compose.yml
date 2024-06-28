@@ -71,6 +71,15 @@ services:
     networks:
       - backend
 
+  mailcatcher:
+    image: schickling/mailcatcher
+    container_name: mailcatcher
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+    networks:
+      - backend
+
 volumes:
   db_data:
 
