@@ -2,27 +2,94 @@
   "swagger": "2.0",
   "info": {
     "version": "1.0.0",
-    "title": "User API",
-    "description": "API for managing users"
+    "title": "User and Post API",
+    "description": "API for managing users, posts, and comments using Express and Prisma"
   },
   "basePath": "/",
   "host": "localhost:3000",
   "schemes": ["http"],
   "paths": {
+    "/": {
+      "get": {
+        "summary": "Get all tables",
+        "description": "Returns all users, posts, and comments in JSON format",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/User"
+                  }
+                },
+                "posts": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Post"
+                  }
+                },
+                "comments": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Comment"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sendemail": {
+      "get": {
+        "summary": "Send an email",
+        "description": "Sends an email using Nodemailer to a specified email address",
+        "responses": {
+          "200": {
+            "description": "Email sent successfully",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
     "/users": {
       "get": {
         "summary": "Get all users",
         "responses": {
           "200": {
-            "description": "List of users"
+            "description": "List of users",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
           }
         }
       },
       "post": {
-        "summary": "Create a user",
+        "summary": "Create a new user",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserInput"
+            }
+          }
+        ],
         "responses": {
           "201": {
-            "description": "User created"
+            "description": "User created successfully",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
           },
           "400": {
             "description": "Bad request"
@@ -32,7 +99,7 @@
     },
     "/users/{id}": {
       "get": {
-        "summary": "Get a user by ID",
+        "summary": "Get user by ID",
         "parameters": [
           {
             "name": "id",
@@ -43,7 +110,10 @@
         ],
         "responses": {
           "200": {
-            "description": "User found"
+            "description": "User found",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
           },
           "404": {
             "description": "User not found"
@@ -51,18 +121,29 @@
         }
       },
       "put": {
-        "summary": "Update a user by ID",
+        "summary": "Update user by ID",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserInput"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "User updated"
+            "description": "User updated successfully",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
           },
           "400": {
             "description": "Bad request"
@@ -73,7 +154,7 @@
         }
       },
       "delete": {
-        "summary": "Delete a user by ID",
+        "summary": "Delete user by ID",
         "parameters": [
           {
             "name": "id",
@@ -84,13 +165,290 @@
         ],
         "responses": {
           "200": {
-            "description": "User deleted"
+            "description": "User deleted successfully"
           },
           "404": {
             "description": "User not found"
           }
         }
       }
+    },
+    "/posts": {
+      "get": {
+        "summary": "Get all posts",
+        "responses": {
+          "200": {
+            "description": "List of posts",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Post"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new post",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PostInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Post created successfully",
+            "schema": {
+              "$ref": "#/definitions/Post"
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      }
+    },
+    "/posts/{id}": {
+      "get": {
+        "summary": "Get post by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post found",
+            "schema": {
+              "$ref": "#/definitions/Post"
+            }
+          },
+          "404": {
+            "description": "Post not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update post by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PostInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post updated successfully",
+            "schema": {
+              "$ref": "#/definitions/Post"
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Post not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete post by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post deleted successfully"
+          },
+          "404": {
+            "description": "Post not found"
+          }
+        }
+      }
+    },
+    "/posts/{id}/comments": {
+      "post": {
+        "summary": "Add a comment to a post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CommentInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Comment added successfully",
+            "schema": {
+              "$ref": "#/definitions/Comment"
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      }
+    },
+    "/posts/{postId}/comments/{commentId}": {
+      "delete": {
+        "summary": "Remove a comment from a post",
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Comment deleted successfully"
+          },
+          "404": {
+            "description": "Comment not found"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "username": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "UserInput": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        }
+      },
+      "required": ["username", "email"]
+    },
+    "Post": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "userId": {
+          "type": "integer"
+        },
+        "title": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "PostInput": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "integer"
+        },
+        "title": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        }
+      },
+      "required": ["userId", "title", "content"]
+    },
+    "Comment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "postId": {
+          "type": "integer"
+        },
+        "userId": {
+          "type": "integer"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "CommentInput": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "integer"
+        },
+        "comment": {
+          "type": "string"
+        }
+      },
+      "required": ["userId", "comment"]
     }
   }
 }

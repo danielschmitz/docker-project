@@ -204,20 +204,113 @@ app.post("/users", async (req, res) => {
   res.json(user);
 });
 
-app.post("/posts", async (req, res) => {
-  const { userId, title, content } = req.body;
-  const post = await prisma.post.create({
-    data: { userId, title, content },
-  });
-  res.json(post);
+///////////////////////////////////
+// POSTS
+//////////////////////////////////
+
+// GET all posts
+app.get("/posts", async (req, res) => {
+  try {
+    const posts = await prisma.post.findMany();
+    res.json(posts);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
-app.post("/comments", async (req, res) => {
-  const { postId, userId, comment } = req.body;
-  const newComment = await prisma.comment.create({
-    data: { postId, userId, comment },
-  });
-  res.json(newComment);
+// GET a post by ID
+app.get("/posts/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id: parseInt(id) },
+    });
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+    res.json(post);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST a new post
+app.post("/posts", async (req, res) => {
+  const { userId, title, content } = req.body;
+  try {
+    const newPost = await prisma.post.create({
+      data: {
+        userId: parseInt(userId),
+        title,
+        content,
+      },
+    });
+    res.status(201).json(newPost);
+  } catch (error) {
+    res.status(400).json({ error: "Invalid request" });
+  }
+});
+
+// PUT update a post by ID
+app.put("/posts/:id", async (req, res) => {
+  const { id } = req.params;
+  const { title, content } = req.body;
+  try {
+    const updatedPost = await prisma.post.update({
+      where: { id: parseInt(id) },
+      data: {
+        title,
+        content,
+      },
+    });
+    res.json(updatedPost);
+  } catch (error) {
+    res.status(400).json({ error: "Invalid request" });
+  }
+});
+
+// DELETE a post by ID
+app.delete("/posts/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.post.delete({
+      where: { id: parseInt(id) },
+    });
+    res.json({ message: "Post deleted successfully" });
+  } catch (error) {
+    res.status(400).json({ error: "Invalid request" });
+  }
+});
+
+// POST add a comment to a post
+app.post("/posts/:id/comments", async (req, res) => {
+  const { id } = req.params;
+  const { userId, comment } = req.body;
+  try {
+    const newComment = await prisma.comment.create({
+      data: {
+        postId: parseInt(id),
+        userId: parseInt(userId),
+        comment,
+      },
+    });
+    res.status(201).json(newComment);
+  } catch (error) {
+    res.status(400).json({ error: "Invalid request" });
+  }
+});
+
+// DELETE remove a comment from a post
+app.delete("/posts/:postId/comments/:commentId", async (req, res) => {
+  const { postId, commentId } = req.params;
+  try {
+    await prisma.comment.delete({
+      where: { id: parseInt(commentId) },
+    });
+    res.json({ message: "Comment deleted successfully" });
+  } catch (error) {
+    res.status(400).json({ error: "Invalid request" });
+  }
 });
 
 app.listen(port, () => {

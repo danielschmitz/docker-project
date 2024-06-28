@@ -51,7 +51,7 @@ services:
       done;
       PGPASSWORD=${POSTGRES_PASSWORD} psql -h db -U ${POSTGRES_USER} -d ${POSTGRES_DB} -f /docker-entrypoint-initdb.d/init.sql
       "
-  web_api:
+  api:
     image: node:16.13
     container_name: web_api
     working_dir: /app
@@ -73,16 +73,16 @@ services:
 
   mailcatcher:
     image: schickling/mailcatcher
-    container_name: mailcatcher
+    container_name: web_mailcatcher
     ports:
       - "1080:1080"
       - "1025:1025"
     networks:
       - backend
 
-  swagger_ui:
+  swagger:
     image: swaggerapi/swagger-ui
-    container_name: swagger_ui
+    container_name: web_swagger
     ports:
       - "8081:8080"
     environment:
