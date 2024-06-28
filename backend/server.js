@@ -7,14 +7,17 @@ const app = express();
 const port = 3000;
 require("dotenv").config();
 const nodemailer = require("nodemailer");
+const Joi = require("joi");
 
 // Configurações de middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Rotas
-
+//
+// GET /
+// Exibe as 3 tabelas no formato JSON
+//
 app.get("/", async (req, res) => {
   const users = await prisma.user.findMany();
   const posts = await prisma.post.findMany();
@@ -22,6 +25,9 @@ app.get("/", async (req, res) => {
   res.json({ users, posts, comments });
 });
 
+//
+// GET /sendemail: envia um email
+//
 app.get("/sendemail", async (req, res) => {
   let transporter = nodemailer.createTransport({
     host: "mailcatcher", //from docker dev
@@ -49,10 +55,136 @@ app.get("/sendemail", async (req, res) => {
   res.json("Access http://localhost:1080 to view email");
 });
 
-app.get("/users", async (req, res) => {
-  const users = await prisma.user.findMany();
-  res.json(users);
+///////////////////////////////////
+// USERS
+//////////////////////////////////
+
+// Joi schema for user validation
+const userSchema = Joi.object({
+  username: Joi.string().required(),
+  email: Joi.string().email().required(),
+  createdAt: Joi.date().optional(),
 });
+
+// Get all users
+app.get("/users", async (req, res) => {
+  try {
+    const users = await prisma.user.findMany();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Get user by ID
+app.get("/users/:id", async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: parseInt(req.params.id) },
+    });
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404).json({ error: "User not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Create a new user
+app.post("/users", async (req, res) => {
+  try {
+    const { error } = userSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const { username, email } = req.body;
+    const existingUser = await prisma.user.findFirst({
+      where: { OR: [{ username }, { email }] },
+    });
+
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ error: "Username or email already exists" });
+    }
+
+    const user = await prisma.user.create({
+      data: { username, email },
+    });
+
+    res.status(201).json(user);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Update a user
+app.put("/users/:id", async (req, res) => {
+  try {
+    const { error } = userSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const { username, email } = req.body;
+    const userId = parseInt(req.params.id);
+
+    const existingUser = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!existingUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const conflictingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { username, NOT: { id: userId } },
+          { email, NOT: { id: userId } },
+        ],
+      },
+    });
+
+    if (conflictingUser) {
+      return res
+        .status(400)
+        .json({ error: "Username or email already exists" });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { username, email },
+    });
+
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Delete a user
+app.delete("/users/:id", async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    await prisma.user.delete({ where: { id: userId } });
+    res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+///////////////////////////////////
+// POSTS
+//////////////////////////////////
 
 app.get("/posts", async (req, res) => {
   const posts = await prisma.post.findMany();
