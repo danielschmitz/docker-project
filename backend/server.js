@@ -13,6 +13,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Rotas
+
+app.get("/", async (req, res) => {
+  const users = await prisma.user.findMany();
+  const posts = await prisma.post.findMany();
+  const comments = await prisma.comment.findMany();
+  res.json({ users, posts, comments });
+});
+
 app.get("/users", async (req, res) => {
   const users = await prisma.user.findMany();
   res.json(users);
