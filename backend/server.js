@@ -313,6 +313,12 @@ app.delete("/posts/:postId/comments/:commentId", async (req, res) => {
   }
 });
 
+app.get("/commentsOfPost", async (req, res) => {
+  const postId = parseInt(req.query.postId);
+  const comments = await prisma.comment.findMany({ where: { postId: postId } });
+  res.json(comments);
+});
+
 app.listen(port, () => {
   console.log(
     `Servidor rodando em http://localhost:${port} -> banco de dados: ${process.env.DATABASE_URL}`

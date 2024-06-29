@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <section class="section">
+      <div class="container">
+        <h1 class="title has-text-centered">Blog</h1>
+        <div id="posts">
+          <!-- Os posts serão carregados aqui -->
+        </div>
+      </div>
+    </section>
+
+    <template id="post-template">
+      <div class="card">
+        <div class="card-content">
+          <p class="title" id="post-title"></p>
+          <p class="subtitle" id="post-content"></p>
+          <div class="content">
+            <strong>Comments:</strong>
+            <div class="comment-list" id="comment-list">
+              <!-- Os comentários serão carregados aqui -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <template id="comment-template">
+      <div class="box">
+        <p id="comment-text"></p>
+      </div>
+    </template>
+
+    <script>
+      $(document).ready(function () {
+        // Carregar posts
+        $.ajax({
+          url: "http://localhost/api/posts",
+          method: "GET",
+          success: function (posts) {
+            const postsContainer = $("#posts");
+            posts.forEach(function (post) {
+              const postTemplate = $($("#post-template").html());
+              postTemplate.find("#post-title").text(post.title);
+              postTemplate.find("#post-content").text(post.content);
+              postTemplate.find("#comment-list").attr("data-post-id", post.id);
+              postsContainer.append(postTemplate);
+            });
+
+            // Carregar comentários para cada post
+            $(".comment-list").each(function () {
+              const postId = $(this).data("post-id");
+              const commentList = $(this);
+              $.ajax({
+                url: "http://localhost/api/commentsOfPost",
+                method: "GET",
+                data: { postId: postId },
+                success: function (comments) {
+                  comments.forEach(function (comment) {
+                    const commentTemplate = $($("#comment-template").html());
+                    commentTemplate.find("#comment-text").text(comment.comment);
+                    commentList.append(commentTemplate);
+                  });
+                },
+              });
+            });
+          },
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -92,6 +92,18 @@ services:
     networks:
       - backend
 
+  web_frontend:
+    image: nginx:latest
+    container_name: web_frontend
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80"
+    networks:
+      - backend
+   
+
 volumes:
   db_data:
 
