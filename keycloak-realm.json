@@ -1,0 +1,29 @@
+{
+    "realm": "myrealm",
+    "enabled": true,
+    "clients": [
+      {
+        "clientId": "myapp",
+        "enabled": true,
+        "secret": "myclientsecret",
+        "directAccessGrantsEnabled": true,
+        "redirectUris": ["http://localhost:3000/*"],
+        "webOrigins": ["http://localhost:3000"]
+      }
+    ],
+    "users": [
+      {
+        "username": "user1",
+        "email": "user1@email.com",
+        "enabled": true,
+        "credentials": [
+          {
+            "type": "password",
+            "value": "password",
+            "temporary": false
+          }
+        ]
+      }
+    ]
+  }
+  
