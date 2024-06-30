@@ -35,10 +35,10 @@ Você pode acessar:
 - `docker-compose.yml`: configuração do docker-compose
 - `backend/server.js`: o servidor node.js que expoé a API REST
 - `backend/prisma/schema.prisma`: o esquema do banco de dados
-- `pgsql.servers.json`: o arquivo de configuração do pgAdmin
-- `migration/init.sql`: o arquivo de script de inicialização do banco de dados
-- `backend/package.json`: o arquivo de configuração do backend
-- `nginx.conf`: o arquivo de configuração do nginx. O nginx é o servidor web que expoe o diretorio frontend. Nessa configuração, é feito um proxy de localhost/api para localhost:3000
+- `config/pgsql.servers.json`: o arquivo de configuração do pgAdmin
+- `config/init.sql`: o arquivo de script de inicialização do banco de dados
+- `config/keycloak-realm.json`: cria uma realm no keycloak com o client `myapp` e o user `user1`
+- `config/nginx.conf`: o arquivo de configuração do nginx. O nginx é o servidor web que expoe o diretorio frontend. Nessa configuração, é feito um proxy de localhost/api para localhost:3000
 - `frontend/index.html`: o index do frontend, um simples arquivo index.html que usa bulma e jquery para ler os posts da api e mostrar na tela
 
 ## Futuro
