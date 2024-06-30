@@ -1,6 +1,6 @@
 # Docker Project
 
-![image](https://github.com/danielschmitz/docker-project/assets/1509692/8722381a-533e-4fca-a16b-85b6ac53687f)
+![image](https://github.com/danielschmitz/docker-project/assets/1509692/fa650dae-c003-42a0-847b-17982565f7e1)
 
 Este projeto possui os seguintes containers:
 
@@ -13,6 +13,7 @@ Este projeto possui os seguintes containers:
 | `web_mailcatcher` | Container MailCatcher para interceptar emails enviados pela aplicação em ambiente de desenvolvimento. |
 | `web_swagger`     | Container Swagger UI para visualização da documentação da api                                         |
 | `web_frontend`    | Aplicação simples que expoe o diretorio frontend ao ngix, sendo acessado pelo navegador               |
+| `web_keycloack`   | Container Keycloak para gerenciamento de autenticação.                                                |
 
 ## Install
 
